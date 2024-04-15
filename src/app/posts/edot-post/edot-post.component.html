@@ -1,0 +1,20 @@
+<form #postForm="ngForm" (ngSubmit)="postUpdated()" action="#">
+  <button type="button" (click)="goBack()" class="go-back-btn">
+    <i class="fa-solid fa-arrow-left"></i>
+  </button>
+  <div>
+    <label>Title</label>
+    <input type="text" name="title" [(ngModel)]="post.title" required />
+    <br />
+    <label>Body</label>
+    <textarea
+      name="body"
+      required
+      cols="30"
+      rows="6"
+      [(ngModel)]="post.body"
+    ></textarea>
+    <br />
+    <button type="submit">Edit</button>
+  </div>
+</form>

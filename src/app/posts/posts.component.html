@@ -1,0 +1,24 @@
+<section>
+  <div class="post-section-container">
+    <div class="posts-container">
+      <ul class="post-headers">
+        <li>POST'S USER</li>
+        <li>TITLE</li>
+        <li>BODY</li>
+      </ul>
+      <div class="post-information">
+        <ul *ngFor="let post of posts" (click)="openEditPost(post.id)">
+          <li>
+            {{ getUserById(post.userId) }}
+          </li>
+          <li>{{ post.title }}</li>
+          <li>{{ post.body }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<app-edot-post
+  *ngIf="selectedTask"
+  (updatePost)="updatePost($event)"
+></app-edot-post>
