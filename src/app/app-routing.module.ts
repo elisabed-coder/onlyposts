@@ -12,7 +12,7 @@ const routes: Routes = [
     path: 'posts',
     component: PostsComponent,
   },
-  { path: 'posts/:id', component: EdotPostComponent },
+  { path: 'edit/:id', component: EdotPostComponent },
 ];
 
 @NgModule({

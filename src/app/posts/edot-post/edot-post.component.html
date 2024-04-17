@@ -1,20 +1,9 @@
-<form #postForm="ngForm" (ngSubmit)="postUpdated()" action="#">
-  <button type="button" (click)="goBack()" class="go-back-btn">
-    <i class="fa-solid fa-arrow-left"></i>
-  </button>
-  <div>
-    <label>Title</label>
-    <input type="text" name="title" [(ngModel)]="post.title" required />
-    <br />
-    <label>Body</label>
-    <textarea
-      name="body"
-      required
-      cols="30"
-      rows="6"
-      [(ngModel)]="post.body"
-    ></textarea>
-    <br />
-    <button type="submit">Edit</button>
-  </div>
+<form *ngIf="post" (ngSubmit)="saveChanges()">
+  <label for="title">Title:</label>
+  <input id="title" type="text" [(ngModel)]="post.title" name="title" />
+
+  <label for="body">Body:</label>
+  <textarea id="body" [(ngModel)]="post.body" name="body"></textarea>
+
+  <button type="submit">Save Changes</button>
 </form>

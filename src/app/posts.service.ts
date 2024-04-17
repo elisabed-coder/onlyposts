@@ -3,46 +3,53 @@ import { HttpClient } from '@angular/common/http';
 import { Post } from './posts/interfaces/post.interface';
 import { User } from './posts/interfaces/user.interface';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, map, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Postservice implements OnInit {
-  private postsSubject = new BehaviorSubject<Post[]>([]);
-  posts$: Observable<Post[]> = this.postsSubject.asObservable();
-
-  users: User[] = [];
-  posts: Post[] = [];
+  private postsSubject: BehaviorSubject<Post[]> = new BehaviorSubject<Post[]>(
+    []
+  );
+  public posts$: Observable<Post[]> = this.postsSubject.asObservable();
+  public users: User[] = [];
+  public posts: Post[] = [];
 
   constructor(private http: HttpClient, private router: Router) {
-    // const storedPosts = JSON.parse(localStorage.getItem('posts') || '[]');
-    // this.postsSubject.next(storedPosts);
+    this.getUsers().subscribe((users) => (this.users = users));
+    this.getPosts().subscribe((posts) => this.postsSubject.next(posts));
   }
 
-  fetchPosts() {
-    this.http
-      .get<Post[]>('https://jsonplaceholder.typicode.com/posts')
-      .subscribe((posts) => {
-        this.postsSubject.next(posts);
-      });
-  }
   ngOnInit(): void {
-    this.getUsers().subscribe((users) => {
-      this.users = users;
-      localStorage.setItem('users', JSON.stringify(this.users));
+    this.getUsers().subscribe((user) => {
+      this.users = user;
+      console.log(this.users);
     });
-    this.getPosts().subscribe((posts) => {
-      this.posts = posts;
-      localStorage.setItem('posts', JSON.stringify(this.posts)); // Save users array to local storage
+    this.getPosts().subscribe((post) => {
+      this.posts = post;
+      console.log(this.posts);
     });
   }
 
   getUsers() {
     return this.http.get<User[]>('https://jsonplaceholder.typicode.com/users');
   }
-  getPosts() {
-    return this.http.get<Post[]>('https://jsonplaceholder.typicode.com/posts');
+  getPosts(): Observable<Post[]> {
+    return forkJoin({
+      posts: this.http.get<Post[]>(
+        'https://jsonplaceholder.typicode.com/posts'
+      ),
+      users: this.getUsers(),
+    }).pipe(
+      map(({ posts, users }) => {
+        // Map posts array to include user names
+        return posts.map((post) => ({
+          ...post,
+          name: users.find((user) => user.id === post.userId)?.name,
+        }));
+      })
+    );
   }
 
   getUserById(userId: number | undefined): string {
@@ -50,17 +57,30 @@ export class Postservice implements OnInit {
     return user ? user.name || '' : '';
   }
 
-  getPostById(id: number): Post | undefined {
-    const posts = this.postsSubject.getValue();
-    return posts.find((post) => post.id === id);
+  getPostById(postId: number | undefined): Observable<Post | undefined> {
+    return this.posts$.pipe(
+      map((posts) => posts.find((post) => post.id === postId))
+    );
   }
-
-  updatePost(updatedPost: Post): void {
-    const posts = this.postsSubject.getValue();
-    const index = posts.findIndex((post) => post.id === updatedPost.id);
-    if (index !== -1) {
-      posts[index] = updatedPost;
-      this.postsSubject.next(posts);
+  updatePost(updatedPost: Post | undefined): Observable<Post | undefined> {
+    if (!updatedPost || updatedPost.id === undefined) {
+      return throwError('Invalid post or post ID');
     }
+
+    const url = `https://jsonplaceholder.typicode.com/posts/${updatedPost.id}`;
+    return this.http.put<Post>(url, updatedPost);
   }
 }
+
+// public postMethod() {
+//   let body = {
+//     title: 'g',
+//     body: 'g',
+//     userid: 1,
+//   };
+//   this.http
+//     .post('https://jsonplaceholder.typicode.com/posts', body)
+//     .subscribe((data) => {
+//       this.PostJSonValue = data;
+//     });
+// }
