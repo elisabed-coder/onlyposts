@@ -62,6 +62,13 @@ export class Postservice implements OnInit {
       map((posts) => posts.find((post) => post.id === postId))
     );
   }
+  CreateTask(data: any) {
+    return this.http.post<any>(
+      'https://jsonplaceholder.typicode.com/posts',
+      data
+    );
+  }
+
   updatePost(updatedPost: Post | undefined): Observable<Post | undefined> {
     if (!updatedPost || updatedPost.id === undefined) {
       return throwError('Invalid post or post ID');

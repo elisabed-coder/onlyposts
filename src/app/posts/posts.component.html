@@ -1,5 +1,17 @@
+<app-add-post
+  *ngIf="showCreateTaskForm"
+  (EmitTaskData)="CreateTask($event)"
+  (CloseForm)="CloseCreateTaskForm()"
+></app-add-post>
+<button class="addPost-btn" (click)="OpenCreateTaskForm()">Add Post</button>
+
 <div *ngFor="let post of posts" (click)="gotoEdit(post)">
-  <h4>{{ getUserById(post.userId) }}</h4>
+  <ng-container *ngIf="getUserById(post.userId); else noUserName">
+    <h4>{{ getUserById(post.userId) }}</h4>
+  </ng-container>
+  <ng-template #noUserName>
+    <h4>{{ post.name }}</h4>
+  </ng-template>
   <p>{{ post.title }}</p>
   <p>{{ post.body }}</p>
 </div>
